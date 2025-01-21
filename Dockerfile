@@ -1,5 +1,5 @@
 ### FRONT BUILD START ###
-FROM --platform=$BUILDPLATFORM node:16-alpine AS front
+FROM --platform=$BUILDPLATFORM node:current-alpine AS front
 
 WORKDIR /app
 
@@ -21,7 +21,7 @@ RUN yarn run build
 
 
 ### BUILD TORRSERVER MULTIARCH START ###
-FROM --platform=$BUILDPLATFORM golang:1.21.2-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1-alpine AS builder
 
 COPY . /opt/src
 COPY --from=front /app/build /opt/src/web/build
@@ -52,8 +52,8 @@ RUN apt-get update && apt-get install -y upx-ucl && upx --best --lzma ./torrserv
 # Compress torrserver only for amd64 and arm64 no variant platforms
 # ARG TARGETARCH
 # ARG TARGETVARIANT
-# RUN if [ "$TARGETARCH" == 'amd64' ]; then compress=1; elif [ "$TARGETARCH" == 'arm64' ] && [ -z "$TARGETVARIANT"  ]; then compress=1; else compress=0; fi \
-# && if [[ "$compress" -eq 1 ]]; then ./upx --best --lzma ./torrserver; fi
+# RUN if [ "$TARGETARCH" == 'amd64' ]; then compress=; elif [ "$TARGETARCH" == 'arm64' ] && [ -z "$TARGETVARIANT"  ]; then compress=; else compress=0; fi \
+# && if [[ "$compress" -eq  ]]; then ./upx --best --lzma ./torrserver; fi
 ### UPX COMPRESSING END ###
 
 
@@ -64,7 +64,7 @@ ENV TS_CONF_PATH="/opt/ts/config"
 ENV TS_LOG_PATH="/opt/ts/log"
 ENV TS_TORR_DIR="/opt/ts/torrents"
 ENV TS_PORT=8090
-ENV GODEBUG=madvdontneed=1
+ENV GODEBUG=madvdontneed=
 
 COPY --from=compressed ./torrserver /usr/bin/torrserver
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
