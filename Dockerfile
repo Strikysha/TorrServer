@@ -1,5 +1,5 @@
 ### FRONT BUILD START ###
-FROM --platform=$BUILDPLATFORM node:current-alpine AS front
+FROM --platform=$BUILDPLATFORM node:lts-alpine AS front
 
 WORKDIR /app
 
@@ -22,7 +22,7 @@ RUN yarn run build
 
 
 ### BUILD TORRSERVER MULTIARCH START ###
-FROM --platform=$BUILDPLATFORM golang:1-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:alpine AS builder
 
 COPY . /opt/src
 COPY --from=front /app/build /opt/src/web/build
