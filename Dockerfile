@@ -1,5 +1,5 @@
 ### FRONT BUILD START ###
-FROM --platform=$BUILDPLATFORM node:lts-alpine AS front
+FROM --platform=$BUILDPLATFORM node:current-alpine AS front
 
 WORKDIR /app
 
