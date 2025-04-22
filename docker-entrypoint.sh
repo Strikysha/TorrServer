@@ -10,11 +10,16 @@ for var in TS_CONF_PATH TS_LOG_PATH TS_TORR_DIR TS_PORT; do
 done
 
 # Создаем необходимые директории
-for dir in "${TS_CONF_PATH}" "${TS_LOG_PATH}" "${TS_TORR_DIR}"; do
+for dir in "${TS_CONF_PATH}" "${TS_TORR_DIR}"; do
     if [ ! -d "$dir" ]; then
         mkdir -p "$dir"
     fi
 done
+
+# Создаем файл лога, если он не существует
+if [ ! -f "${TS_LOG_PATH}" ]; then
+    touch "${TS_LOG_PATH}"
+fi
 
 # Формируем базовые флаги
 FLAGS="--path $TS_CONF_PATH --logpath $TS_LOG_PATH --port $TS_PORT --torrentsdir $TS_TORR_DIR"
