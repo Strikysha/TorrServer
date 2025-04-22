@@ -48,13 +48,15 @@ FROM debian:buster-slim AS compressed
 
 COPY --from=builder /opt/src/server/torrserver ./torrserver
 
-RUN apt-get update && apt-get install -y upx-ucl && upx --best --lzma ./torrserver
-# Compress torrserver only for amd64 and arm64 no variant platforms
-# ARG TARGETARCH
-# ARG TARGETVARIANT
-# RUN if [ "$TARGETARCH" == 'amd64' ]; then compress=1; elif [ "$TARGETARCH" == 'arm64' ] && [ -z "$TARGETVARIANT"  ]; then compress=1; else compress=0; fi \
-# && if [[ "$compress" -eq 1 ]]; then ./upx --best --lzma ./torrserver; fi
+ARG TARGETARCH
+
+# Только для amd64 сжимаем
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+      apt-get update && apt-get install -y upx-ucl && \
+      upx --best --lzma ./torrserver; \
+    fi
 ### UPX COMPRESSING END ###
+
 
 
 ### BUILD MAIN IMAGE START ###
