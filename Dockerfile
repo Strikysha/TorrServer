@@ -49,29 +49,34 @@ FROM debian:buster-slim AS compressed
 COPY --from=builder /opt/src/server/torrserver ./torrserver
 
 ARG TARGETARCH
+ARG TARGETVARIANT
 
-# Только для amd64 сжимаем
+# Применяем UPX только для amd64, для ARM архитектур пропускаем этот шаг
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
-      apt-get update && apt-get install -y upx-ucl && \
-      upx --best --lzma ./torrserver; \
+      apt-get update && \
+      apt-get install -y upx-ucl && \
+      upx --best --lzma ./torrserver || true; \
     fi
 ### UPX COMPRESSING END ###
-
 
 
 ### BUILD MAIN IMAGE START ###
 FROM alpine
 
-ENV TS_CONF_PATH="/opt/ts/config"
-ENV TS_LOG_PATH="/opt/ts/log"
-ENV TS_TORR_DIR="/opt/ts/torrents"
-ENV TS_PORT=8090
-ENV GODEBUG=madvdontneed=1
+ENV TS_CONF_PATH="/opt/ts/config" \
+    TS_LOG_PATH="/opt/ts/log" \
+    TS_TORR_DIR="/opt/ts/torrents" \
+    TS_PORT=8090 \
+    GODEBUG=madvdontneed=1
 
 COPY --from=compressed ./torrserver /usr/bin/torrserver
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
 RUN apk add --no-cache --update ffmpeg
 
-CMD /docker-entrypoint.sh
+# Добавляем проверку здоровья
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD wget -q --spider http://localhost:${TS_PORT}/ || exit 1
+
+CMD ["/docker-entrypoint.sh"]
 ### BUILD MAIN IMAGE end ###
