@@ -69,10 +69,13 @@ ENV TS_CONF_PATH="/opt/ts/config" \
     TS_PORT=8090 \
     GODEBUG=madvdontneed=1
 
+# Создаем необходимые директории и файлы
+RUN mkdir -p "${TS_CONF_PATH}" "${TS_TORR_DIR}" && \
+    touch "${TS_LOG_PATH}" && \
+    apk add --no-cache --update ffmpeg
+
 COPY --from=compressed ./torrserver /usr/bin/torrserver
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
-
-RUN apk add --no-cache --update ffmpeg
 
 # Добавляем проверку здоровья
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
