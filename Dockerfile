@@ -64,7 +64,7 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
 FROM alpine
 
 ENV TS_CONF_PATH="/opt/ts/config" \
-    TS_LOG_PATH="/opt/ts/log" \
+    TS_LOG_PATH="/opt/ts/torrserver.log" \
     TS_TORR_DIR="/opt/ts/torrents" \
     TS_PORT=8090 \
     GODEBUG=madvdontneed=1
@@ -72,6 +72,7 @@ ENV TS_CONF_PATH="/opt/ts/config" \
 # Создаем необходимые директории и файлы
 RUN mkdir -p "${TS_CONF_PATH}" "${TS_TORR_DIR}" && \
     touch "${TS_LOG_PATH}" && \
+    chmod 666 "${TS_LOG_PATH}" && \
     apk add --no-cache --update ffmpeg
 
 COPY --from=compressed ./torrserver /usr/bin/torrserver
